@@ -1,3 +1,9 @@
+/* Create db */
+DROP DATABASE IF EXISTS tapclicks;
+CREATE DATABASE tapclicks;
+
+/* Use tapclicks */
+USE tapclicks;
 
 /*Table structure for table `zz__yashi_cgn` */
 
