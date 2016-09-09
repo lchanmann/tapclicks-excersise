@@ -1,11 +1,19 @@
 <?php
 
+/**
+* FTPClient class
+*/
 class FTPClient
 {
     private $connection;
         
     // constructor
     public function __construct() { }
+    
+    // destructor
+    public function __destruct() {
+        $this->close();
+    } 
     
     /**
     * Establish connection to FTP server
@@ -40,6 +48,18 @@ class FTPClient
     public function ls($directory = '.') {
         $content = ftp_nlist($this->connection, $directory);
         return $content;
+    }
+    
+    /**
+    * Get file from server
+    *
+    * get($filename)
+    * @return path to downloaded file
+    */
+    public function get($filename) {
+        $localFile = "downloads/{$filename}";
+        $success = ftp_get($this->connection, $localFile, $filename, FTP_ASCII);
+        return $success ? $localFile : null;
     }
 }
 
