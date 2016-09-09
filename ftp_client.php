@@ -51,6 +51,22 @@ class FTPClient
     }
     
     /**
+    * Find files with name that matches $pattern
+    * grep($pattern)
+    * @return matched files
+    */
+    public function grep($pattern='/*/') {
+        $matched = array();
+        $files = $this->ls();
+        foreach ($files as $file) {
+            if (preg_match($pattern, $file)) {
+                $matched[] = $file;
+            }
+        }
+        return $matched;
+    }
+    
+    /**
     * Get file from server
     *
     * get($filename)

@@ -17,6 +17,6 @@ $login  = $client->connect(APP_FTP_HOST, APP_FTP_USER, APP_FTP_PASS);
 
 if ($login) {
     $advertiser = Advertiser::from_csv( $client->get(APP_ADVERTISERS_CSV) );
-    print_r( $advertiser );
+    $dataFiles = $client->grep('/^Yashi_2016-05/');
 }
 ?>
