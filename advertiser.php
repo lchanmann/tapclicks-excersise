@@ -37,7 +37,7 @@ class Advertiser
             }
             fclose($file);
         }
-        return $records;
+        return $records;        
     }
 }
 

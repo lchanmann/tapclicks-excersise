@@ -6,9 +6,12 @@
 class FTPClient
 {
     private $connection;
+    private $localDir;
         
     // constructor
-    public function __construct() { }
+    public function __construct($localDir = "downloads") {
+        $this->localDir = realpath($localDir);
+    }
     
     // destructor
     public function __destruct() {
@@ -45,7 +48,7 @@ class FTPClient
     * ls($directory = '.')
     * @return $content:array of the directory
     */
-    public function ls($directory = '.') {
+    public function ls($directory = ".") {
         $content = ftp_nlist($this->connection, $directory);
         return $content;
     }
@@ -55,7 +58,7 @@ class FTPClient
     * grep($pattern)
     * @return matched files
     */
-    public function grep($pattern='/*/') {
+    public function grep($pattern = '/*/') {
         $matched = array();
         $files = $this->ls();
         foreach ($files as $file) {
@@ -73,9 +76,13 @@ class FTPClient
     * @return path to downloaded file
     */
     public function get($filename) {
-        $localFile = "downloads/{$filename}";
-        $success = ftp_get($this->connection, $localFile, $filename, FTP_ASCII);
-        return $success ? $localFile : null;
+        if (is_dir($this->localDir)) {
+            $localFile = $this->localDir . "/" . $filename;
+            if (ftp_get($this->connection, $localFile, $filename, FTP_ASCII)) {
+                return $localFile;
+            }
+        }
+        return null;
     }
 }
 
