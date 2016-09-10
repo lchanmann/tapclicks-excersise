@@ -50,7 +50,6 @@ class Application
             return $obj->id;
         }, $this->get_advertisers(APP_ADVERTISERS_CSV));
         $this->import_csv(APP_DATAFILES_PATTERN, $advertiser_ids);
-        print_r($this->data->creatives); exit(1);
         $this->migrate_data();
     }
     
@@ -81,6 +80,7 @@ class Application
     
     // migrate data to database
     private function migrate_data() {
+        echo("Start migrating data...");
         $mysqli = mysqli_connect(APP_MYSQL_HOST, APP_MYSQL_USER, APP_MYSQL_PASS, APP_MYSQL_DB);
         if (!$mysqli) {
             fwrite(STDERR, "Error: Unable to connect to the MySQL server.\n");
@@ -89,6 +89,7 @@ class Application
         
         $migration = new Migration($mysqli);
         $migration->start($this->data);
+        echo(" Done!\n");
     }
 }
 ?>
