@@ -66,6 +66,7 @@ class Application
             $csv = $this->ftpClient->get($file);
             $data->import($csv);
         }
+        print_r($data->creatives);
     }
 }
 ?>

@@ -1,5 +1,7 @@
 <?php
 
+include('array_helpers.php');
+
 /**
 * Data class
 */
@@ -35,16 +37,19 @@ class Data
     * Import data from csv
     * import($filename)
     */
-    private $dataFields = array(100 => 'Date', 'Impressions', 'Clicks', '25% Viewed', '50% Viewed', '75% Viewed', '100% Viewed');
+    private $dateField  = array(100 => 'Date');
+    private $dataFields = array(101 => 'Impressions', 'Clicks', '25% Viewed', '50% Viewed', '75% Viewed', '100% Viewed');
     public function import($filename) {
         // FIXME: duplicate with Advertiser::from_csv
         $file = fopen($filename, "r");
         if ($file) {
-            $fields = array_flip(fgetcsv($file));
-            while ( $data = fgetcsv($file) ) {
-                $advertiser_id = $data[ $fields['Advertiser ID'] ];
+            $fieldIndices = array_flip(fgetcsv($file));
+            while ( $row = fgetcsv($file) ) {
+                $advertiser_id = $row[ $fieldIndices['Advertiser ID'] ];
                 if (in_array($advertiser_id, $this->advertiser_ids)) {
-                    $this->add_campaign($data, $fields);
+                    $this->add_campaign($row, $fieldIndices);
+                    $this->add_order($row, $fieldIndices);
+                    $this->add_creative($row, $fieldIndices);
                 }
             }
             fclose($file);
@@ -52,25 +57,49 @@ class Data
     }
     
     // Add campaign
-    private function add_campaign($data, $fields) {
-         $campaign = $this->create_campaign($data, $fields);
-         foreach ($this->campaigns as &$cgn) {
-             if ($cgn['Campaign ID'] == $campaign['Campaign ID']) {
-                 $this->update_stats($cgn, $campaign);
+    private function add_campaign($row, $fieldIndices) {
+        $campaign = $this->create_data(array('Campaign ID', 'Campaign Name', 'Advertiser ID', 'Advertiser Name'), $row, $fieldIndices);
+        foreach ($this->campaigns as &$cgn) {
+            if (array_have_same(array('Campaign ID'), $cgn, $campaign)) {
+                $this->update_stats($cgn, $campaign);
+                return;
+            }
+        }
+        $this->campaigns[] = $campaign;
+    }
+    
+    // Add order
+    private function add_order($row, $fieldIndices) {
+         $order = $this->create_data(array('Order ID', 'Campaign ID', 'Order Name'), $row, $fieldIndices);
+         foreach ($this->orders as &$ord) {
+             if (array_have_same(array('Campaign ID', 'Order ID'), $ord, $order)) {
+                 $this->update_stats($ord, $order);
                  return;
              }
          }
-         $this->campaigns[] = $campaign;
+         $this->orders[] = $order;
     }
     
-    // Create campaign
-    private function create_campaign($data, $fields) {
-        $campaignFields = array('Campaign ID', 'Campaign Name', 'Advertiser ID', 'Advertiser Name') + $this->dataFields;
-        $campaign = array();
-        foreach ($campaignFields as $name) {
-            $campaign[$name] = $data[ $fields[$name] ];
+    // Add creative
+    private function add_creative($row, $fieldIndices) {
+         $creative = $this->create_data(array('Creative ID', 'Order ID', 'Creative Name', 'Creative Preview URL'), $row, $fieldIndices);
+         foreach ($this->creatives as &$ctv) {
+             if (array_have_same(array('Order ID', 'Creative ID'), $ctv, $creative)) {
+                 $this->update_stats($ctv, $creative);
+                 return;
+             }
+         }
+         $this->creatives[] = $creative;
+    }
+    
+    // Create data
+    private function create_data($fields, $row, $fieldIndices) {
+        $fields += $this->dateField + $this->dataFields;
+        $data = array();
+        foreach ($fields as $field) {
+            $data[$field] = $row[ $fieldIndices[$field] ];
         }
-        return $campaign;
+        return $data;
     }
     
     // Update statistics data
