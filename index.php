@@ -6,7 +6,7 @@ define('APP_FTP_USER', "ftp_integration_test");
 define('APP_FTP_PASS', "6k0Sb#EXT6jw");
 
 define('APP_ADVERTISERS_CSV', 'Yashi_Advertisers.csv');
-define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05-29/');
+define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05-(29|30)/');
 
 define('APP_MYSQL_HOST', "127.0.0.1");
 define('APP_MYSQL_USER', "root");
@@ -50,7 +50,7 @@ class Application
             return $obj->id;
         }, $this->get_advertisers(APP_ADVERTISERS_CSV));
         $this->import_csv(APP_DATAFILES_PATTERN, $advertiser_ids);
-        print_r($this->data->campaigns); exit(1);
+        print_r($this->data->creatives); exit(1);
         $this->migrate_data();
     }
     

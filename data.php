@@ -1,12 +1,16 @@
 <?php
 
 include('array_helpers.php');
+include('data_factory.php');
 
 /**
 * Data class
 */
 class Data
 {
+    // Data log fields
+    public static $logFields = array('Date', 'Impressions', 'Clicks', '25% Viewed', '50% Viewed', '75% Viewed', '100% Viewed');
+    
     // Advertiser ids
     private $advertiser_ids;
     
@@ -37,18 +41,22 @@ class Data
     * Import data from csv
     * import($filename)
     */
-    private $dateField  = array(100 => 'Date');
-    private $dataFields = array(101 => 'Impressions', 'Clicks', '25% Viewed', '50% Viewed', '75% Viewed', '100% Viewed');
     public function import($filename) {
         $file = fopen($filename, "r");
         if ($file) {
             $fieldIndices = array_flip(fgetcsv($file));
+            $dataFactory = new DataFactory($fieldIndices);
             while ( $row = fgetcsv($file) ) {
                 $advertiser_id = $row[ $fieldIndices['Advertiser ID'] ];
                 if (in_array($advertiser_id, $this->advertiser_ids)) {
-                    $this->add_campaign($row, $fieldIndices);
-                    $this->add_order($row, $fieldIndices);
-                    $this->add_creative($row, $fieldIndices);
+                    $campaign = $dataFactory->create(array('Campaign ID', 'Campaign Name', 'Advertiser ID', 'Advertiser Name'), $row);
+                    $this->add_campaign($campaign);
+                    
+                    $order = $dataFactory->create(array('Order ID', 'Campaign ID', 'Order Name'), $row);
+                    $this->add_order($order);
+
+                    $creative = $dataFactory->create(array('Creative ID', 'Order ID', 'Creative Name', 'Creative Preview URL'), $row);
+                    $this->add_creative($creative);
                 }
             }
             fclose($file);
@@ -56,11 +64,10 @@ class Data
     }
     
     // Add campaign
-    private function add_campaign($row, $fieldIndices) {
-        $campaign = $this->create_data(array('Campaign ID', 'Campaign Name', 'Advertiser ID', 'Advertiser Name'), $row, $fieldIndices);
+    private function add_campaign($campaign) {
         foreach ($this->campaigns as &$cgn) {
             if (array_have_same(array('Campaign ID'), $cgn, $campaign)) {
-                $this->update_stats($cgn, $campaign);
+                $this->add_or_update_logs($cgn['Logs'], $campaign['Logs'][0]);
                 return;
             }
         }
@@ -68,11 +75,10 @@ class Data
     }
     
     // Add order
-    private function add_order($row, $fieldIndices) {
-         $order = $this->create_data(array('Order ID', 'Campaign ID', 'Order Name'), $row, $fieldIndices);
+    private function add_order($order) {
          foreach ($this->orders as &$ord) {
              if (array_have_same(array('Campaign ID', 'Order ID'), $ord, $order)) {
-                 $this->update_stats($ord, $order);
+                 $this->add_or_update_logs($ord['Logs'], $order['Logs'][0]);
                  return;
              }
          }
@@ -80,32 +86,28 @@ class Data
     }
     
     // Add creative
-    private function add_creative($row, $fieldIndices) {
-         $creative = $this->create_data(array('Creative ID', 'Order ID', 'Creative Name', 'Creative Preview URL'), $row, $fieldIndices);
+    private function add_creative($creative) {
          foreach ($this->creatives as &$ctv) {
              if (array_have_same(array('Order ID', 'Creative ID'), $ctv, $creative)) {
-                 $this->update_stats($ctv, $creative);
+                 $this->add_or_update_logs($ctv['Logs'], $creative['Logs'][0]);
                  return;
              }
          }
          $this->creatives[] = $creative;
     }
     
-    // Create data
-    private function create_data($fields, $row, $fieldIndices) {
-        $fields += $this->dateField + $this->dataFields;
-        $data = array();
-        foreach ($fields as $field) {
-            $data[$field] = $row[ $fieldIndices[$field] ];
+    // Add or update log data
+    private function add_or_update_logs(&$target, $data) {
+        $logFields = array_slice(self::$logFields, 1);
+        foreach ($target as &$log) {
+            if (array_have_same(array('Date'), $data, $log)) {
+                foreach($logFields as $field) {
+                    $log[$field] += $data[$field];
+                }
+                return;
+            }
         }
-        return $data;
-    }
-    
-    // Update statistics data
-    private function update_stats(&$target, $data) {
-        foreach($this->dataFields as $field) {
-            $target[$field] += $data[$field];
-        }
+        $target[] = $data;
     }
 }
 ?>
