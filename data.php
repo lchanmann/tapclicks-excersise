@@ -40,7 +40,6 @@ class Data
     private $dateField  = array(100 => 'Date');
     private $dataFields = array(101 => 'Impressions', 'Clicks', '25% Viewed', '50% Viewed', '75% Viewed', '100% Viewed');
     public function import($filename) {
-        // FIXME: duplicate with Advertiser::from_csv
         $file = fopen($filename, "r");
         if ($file) {
             $fieldIndices = array_flip(fgetcsv($file));

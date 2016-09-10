@@ -6,12 +6,18 @@ define('APP_FTP_USER', "ftp_integration_test");
 define('APP_FTP_PASS', "6k0Sb#EXT6jw");
 
 define('APP_ADVERTISERS_CSV', 'Yashi_Advertisers.csv');
-define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05/');
+define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05-29/');
+
+define('APP_MYSQL_HOST', "127.0.0.1");
+define('APP_MYSQL_USER', "root");
+define('APP_MYSQL_PASS', "");
+define('APP_MYSQL_DB', "tapclicks");
 
 // Include dependencies
 include('ftp_client.php');
 include('advertiser.php');
 include('data.php');
+include('migration.php');
 
 /**
 * Run the application
@@ -26,6 +32,9 @@ class Application
 {
     // FTP client
     private $ftpClient;
+    // Aggregated data
+    private $data;
+    
     
     // Constructor
     public function __construct($ftpClient) {
@@ -41,13 +50,15 @@ class Application
             return $obj->id;
         }, $this->get_advertisers(APP_ADVERTISERS_CSV));
         $this->import_csv(APP_DATAFILES_PATTERN, $advertiser_ids);
+        print_r($this->data->campaigns); exit(1);
+        $this->migrate_data();
     }
     
     // connect to ftp server
     private function connect($server, $user, $password) {
         $success = $this->ftpClient->connect($server, $user, $password);
         if (!$success) {
-            fwrite(STDERR, "Could not connect to the ftp server.\n");
+            fwrite(STDERR, "Error: Unable to connect to FTP server.\n");
             exit(1);
         }
     }
@@ -61,12 +72,23 @@ class Application
     // import data from csv
     private function import_csv($pattern, $advertiser_ids) {
         $dataFiles = $this->ftpClient->grep($pattern);
-        $data = new Data($advertiser_ids);
+        $this->data = new Data($advertiser_ids);
         foreach ($dataFiles as $file) {
             $csv = $this->ftpClient->get($file);
-            $data->import($csv);
+            $this->data->import($csv);
         }
-        print_r($data->creatives);
+    }
+    
+    // migrate data to database
+    private function migrate_data() {
+        $mysqli = mysqli_connect(APP_MYSQL_HOST, APP_MYSQL_USER, APP_MYSQL_PASS, APP_MYSQL_DB);
+        if (!$mysqli) {
+            fwrite(STDERR, "Error: Unable to connect to the MySQL server.\n");
+            exit(1);
+        }
+        
+        $migration = new Migration($mysqli);
+        $migration->start($this->data);
     }
 }
 ?>

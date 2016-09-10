@@ -26,18 +26,16 @@ class Advertiser
     * @return array(advertiser)
     */
     public static function from_csv($filename) {
-        $records = array();
+        $data = array();
         $file = fopen($filename, "r");
         if ($file) {
-            // skip csv header line
-            fgetcsv($file);
-            while ( $data = fgetcsv($file) ) {
-                // TODO: refactor hard-coded column indexes
-                $records[] = new Advertiser($data[0], $data[1]);
+            $fieldIndices = array_flip(fgetcsv($file));
+            while ( $row = fgetcsv($file) ) {
+                $data[] = new Advertiser($row[ $fieldIndices['Advertiser ID'] ], $row[ $fieldIndices['Advertiser Name'] ]);
             }
             fclose($file);
         }
-        return $records;        
+        return $data;        
     }
 }
 
