@@ -79,7 +79,7 @@ class FTPClient
         if (is_dir($this->localDir)) {
             $localFile = $this->localDir . "/" . $filename;
             if (ftp_get($this->connection, $localFile, $filename, FTP_ASCII)) {
-                return $localFile;
+                 return $localFile;
             }
         }
         return null;
