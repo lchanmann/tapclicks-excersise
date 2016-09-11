@@ -1,12 +1,13 @@
 <?php
 
 // Global settings
+// TODO: use ENV instead of hard-corded values for ftp server configs
 define('APP_FTP_HOST', "ftp.clickfuel.com");
 define('APP_FTP_USER', "ftp_integration_test");
 define('APP_FTP_PASS', "6k0Sb#EXT6jw");
 
 define('APP_ADVERTISERS_CSV', 'Yashi_Advertisers.csv');
-define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05-(29|30)/');
+define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05/');
 
 define('APP_MYSQL_HOST', $_ENV['APP_MYSQL_HOST']);
 define('APP_MYSQL_USER', $_ENV['APP_MYSQL_USER']);
