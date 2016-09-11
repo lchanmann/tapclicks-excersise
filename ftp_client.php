@@ -10,6 +10,9 @@ class FTPClient
         
     // constructor
     public function __construct($localDir = "downloads") {
+        if (!is_dir($localDir)) {
+            mkdir($localDir, 0755, true);
+        }
         $this->localDir = realpath($localDir);
     }
     
@@ -76,15 +79,14 @@ class FTPClient
     * @return path to downloaded file
     */
     public function get($filename) {
-        if (is_dir($this->localDir)) {
-            $localFile = $this->localDir . "/" . $filename;
-            if (!is_file($localFile)) {
-                echo("\n\tdownloading {$filename}");
-                ftp_get($this->connection, $localFile, $filename, FTP_ASCII);
+        $localFile = $this->localDir . "/" . $filename;
+        if (!is_file($localFile)) {
+            echo("\n\tdownloading {$filename}");
+            if (!ftp_get($this->connection, $localFile, $filename, FTP_ASCII)) {
+                return null;
             }
-            return $localFile;
         }
-        return null;
+        return $localFile;
     }
 }
 
