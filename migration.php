@@ -40,6 +40,8 @@ class Migration
         $stmtRegular->bind_param("iisis", $campaignId, $campaignId, $name, $advertiserId, $advertiserName);
         
         $stmtData = $this->build_data_stmt("zz__yashi_cgn_data", "campaign_id");
+        
+        echo("\n\tinsert into `zz__yashi_cgn` and `zz__yashi_cgn_data` ...");
         foreach ($campaigns as $cgn) {
             $campaignId = $cgn['Campaign ID'];
             $name = $cgn['Campaign Name'];
@@ -56,6 +58,8 @@ class Migration
         $stmtRegular->bind_param("iiis", $orderId, $campaignId, $orderId, $name);
         
         $stmtData = $this->build_data_stmt("zz__yashi_order_data", "order_id");
+        
+        echo("\n\tinsert into `zz__yashi_order` and `zz__yashi_order_data` ...");
         foreach ($orders as $ord) {
             $orderId = $ord['Order ID'];
             $campaignId = $ord['Campaign ID'];
@@ -71,6 +75,8 @@ class Migration
         $stmtRegular->bind_param("iiiss", $creativeId, $orderId, $creativeId, $name, $previewUrl);
         
         $stmtData = $this->build_data_stmt("zz__yashi_creative_data", "creative_id");
+        
+        echo("\n\tinsert into `zz__yashi_creative` and `zz__yashi_creative_data` ...");
         foreach ($creatives as $ctv) {
             $creativeId = $ctv['Creative ID'];
             $orderId = $ctv['Order ID'];
@@ -99,7 +105,7 @@ class Migration
         $tableName = backticks_wrap($table);
         $columnList = join(", ", array_map("backticks_wrap", $columns));
         $valueList = trim(str_repeat("?, ", count($columns)), ", ");
-        $sql = "INSERT INTO {$tableName} ({$columnList}) VALUES ({$valueList});";
+        $sql = "INSERT INTO {$tableName} ({$columnList}) VALUES ({$valueList})";
         return $this->mysqli->prepare($sql);
     }
     

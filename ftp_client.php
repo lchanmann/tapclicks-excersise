@@ -78,6 +78,7 @@ class FTPClient
     public function get($filename) {
         if (is_dir($this->localDir)) {
             $localFile = $this->localDir . "/" . $filename;
+            echo("\n\tdownloading {$filename}");
             if (ftp_get($this->connection, $localFile, $filename, FTP_ASCII)) {
                  return $localFile;
             }

@@ -51,25 +51,30 @@ class Application
         }, $this->get_advertisers(APP_ADVERTISERS_CSV));
         $this->import_csv(APP_DATAFILES_PATTERN, $advertiser_ids);
         $this->migrate_data();
+        echo("\n\nDone!!!");
     }
     
     // connect to ftp server
     private function connect($server, $user, $password) {
+        echo("\nConnecting to FTP server ... ");
         $success = $this->ftpClient->connect($server, $user, $password);
         if (!$success) {
             fwrite(STDERR, "Error: Unable to connect to FTP server.\n");
             exit(1);
         }
+        echo("success.");
     }
     
     // get advertisers
     private function get_advertisers($filename) {
+        echo("\nGet advertisers information: ");
         $advertisers_csv = $this->ftpClient->get($filename);
         return Advertiser::from_csv( $advertisers_csv );
     }
     
     // import data from csv
     private function import_csv($pattern, $advertiser_ids) {
+        echo("\nImport data from CSV files: ");
         $dataFiles = $this->ftpClient->grep($pattern);
         $this->data = new Data($advertiser_ids);
         foreach ($dataFiles as $file) {
@@ -80,7 +85,7 @@ class Application
     
     // migrate data to database
     private function migrate_data() {
-        echo("Start migrating data...");
+        echo("\nStart migrating data: ");
         $mysqli = mysqli_connect(APP_MYSQL_HOST, APP_MYSQL_USER, APP_MYSQL_PASS, APP_MYSQL_DB);
         if (!$mysqli) {
             fwrite(STDERR, "Error: Unable to connect to the MySQL server.\n");
@@ -89,7 +94,6 @@ class Application
         
         $migration = new Migration($mysqli);
         $migration->start($this->data);
-        echo(" Done!\n");
     }
 }
 ?>

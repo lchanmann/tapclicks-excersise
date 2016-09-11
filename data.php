@@ -44,6 +44,7 @@ class Data
     public function import($filename) {
         $file = fopen($filename, "r");
         if ($file) {
+            echo("\n\timporting data from {$filename}");
             $fieldIndices = array_flip(fgetcsv($file));
             $dataFactory = new DataFactory($fieldIndices);
             while ( $row = fgetcsv($file) ) {
