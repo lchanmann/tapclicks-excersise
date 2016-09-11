@@ -8,10 +8,10 @@ define('APP_FTP_PASS', "6k0Sb#EXT6jw");
 define('APP_ADVERTISERS_CSV', 'Yashi_Advertisers.csv');
 define('APP_DATAFILES_PATTERN', '/^Yashi_2016-05-(29|30)/');
 
-define('APP_MYSQL_HOST', "127.0.0.1");
-define('APP_MYSQL_USER', "root");
-define('APP_MYSQL_PASS', "");
-define('APP_MYSQL_DB', "tapclicks");
+define('APP_MYSQL_HOST', $_ENV['APP_MYSQL_HOST']);
+define('APP_MYSQL_USER', $_ENV['APP_MYSQL_USER']);
+define('APP_MYSQL_PASS', $_ENV['APP_MYSQL_PASS']);
+define('APP_MYSQL_DB', $_ENV['APP_MYSQL_DB']);
 
 // Include dependencies
 include('ftp_client.php');
