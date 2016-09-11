@@ -31,7 +31,7 @@ class Migration
     public function start($data) {
         $this->insert_campaigns($data->campaigns);
         $this->insert_orders($data->orders);
-        // $this->insert_creatives($data->creatives);
+        $this->insert_creatives($data->creatives);
     }
     
     // insert campaigns
@@ -62,6 +62,22 @@ class Migration
             $name = $ord['Order Name'];
             $stmtRegular->execute();
             $this->insert_logs($ord['Logs'], $orderId, $stmtData);
+        }
+    }
+    
+    // insert creatives
+    private function insert_creatives($creatives) {
+        $stmtRegular = $this->build_stmt("zz__yashi_creative", array("creative_id", "order_id", "yashi_creative_id", "name", "preview_url"));
+        $stmtRegular->bind_param("iiiss", $creativeId, $orderId, $creativeId, $name, $previewUrl);
+        
+        $stmtData = $this->build_data_stmt("zz__yashi_creative_data", "creative_id");
+        foreach ($creatives as $ctv) {
+            $creativeId = $ctv['Creative ID'];
+            $orderId = $ctv['Order ID'];
+            $name = $ctv['Creative Name'];
+            $previewUrl = $ctv['Creative Preview URL'];
+            $stmtRegular->execute();
+            $this->insert_logs($ctv['Logs'], $creativeId, $stmtData);
         }
     }
     
